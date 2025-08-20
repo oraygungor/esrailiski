@@ -22,6 +22,7 @@
         .controls { display: flex; flex-wrap: wrap; gap: 8px }
         button { background: #1a2242; border: 1px solid #2a3560; color: var(--ink); padding: 10px 14px; border-radius: 12px; cursor: pointer; font-weight: 600; transition: all 0.2s ease; }
         button:hover { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(106, 160, 255, .12) }
+        button:disabled { cursor: not-allowed; opacity: 0.5; }
         button.primary { background: linear-gradient(180deg, #2a5cff, #1a3ed6); border-color: #2a5cff }
         button.ghost { background: transparent }
         button.danger { background: #3a1430; border-color: #7a1e55 }
@@ -49,7 +50,6 @@
         /* Checkbox Styles */
         input[type="checkbox"] {
             -webkit-appearance: none; appearance: none; background-color: transparent; 
-            /* This line is changed to center the checkbox */
             margin-inline: auto;
             font: inherit; color: currentColor; width: 1.25em; height: 1.25em;
             border: 0.15em solid #4a5568; border-radius: 0.25rem;
@@ -62,12 +62,41 @@
         }
         input[type="checkbox"]:checked { border-color: var(--accent); background-color: var(--accent); }
         input[type="checkbox"]:checked::before { transform: scale(1); }
+        
+        /* AI Section Styles */
+        #ai-result-container {
+            background: #0f1630;
+            border: 1px solid var(--border-color-light);
+            border-radius: 16px;
+            padding: 24px;
+            margin-top: 24px;
+        }
+        #ai-result-container h2 {
+            margin: 0 0 16px 0;
+            color: var(--accent2);
+            font-size: 20px;
+        }
+        #ai-result {
+            line-height: 1.7;
+            color: var(--muted);
+        }
+        .loader {
+            width: 50px;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            border: 8px solid #55e0ff;
+            border-right-color: var(--accent);
+            animation: l2 1s infinite linear;
+            margin: 20px auto;
+        }
+        @keyframes l2 {to{transform: rotate(1turn)}}
+
 
         @media (max-width: 700px) {
             header .wrap { flex-direction: column; align-items: flex-start }
         }
         @media print {
-            header, .controls, .tip, .foot { display: none !important }
+            header, .controls, .tip, .foot, #ai-section { display: none !important }
             body { background: #fff; color: #000 }
             .card { background: #fff; border-color: #bbb; box-shadow: none; }
             .question-table { page-break-inside: auto; }
@@ -120,8 +149,17 @@
                 </div>
             </form>
         </section>
+
+        <section id="ai-section" class="panel">
+            <button id="btnGetAI" class="primary w-full" style="width: 100%; padding-block: 14px; font-size: 16px;">Yorum Al (Yapay Zeka)</button>
+            <div id="ai-result-container" style="display: none;">
+                <h2>Kişisel Değerlendirme</h2>
+                <div id="ai-result"></div>
+            </div>
+        </section>
+
         <section class="panel muted small">
-            <p><strong>Uyarı:</strong> Bu araç bilgilendirme ve kişisel farkındalık amaçlıdır; bir değerlendirme/teşhis aracı değildir.</p>
+            <p><strong>Uyarı:</strong> Bu araç bilgilendirme ve kişisel farkındalık amaçlıdır; bir değerlendirme/teşhis aracı değildir. Yapay zeka tarafından üretilen yorumlar tavsiye niteliği taşımaz.</p>
         </section>
     </main>
 
@@ -180,6 +218,9 @@
         answered: document.getElementById('answered'),
         total: document.getElementById('total'),
         bar: document.getElementById('bar'),
+        aiResultContainer: document.getElementById('ai-result-container'),
+        aiResult: document.getElementById('ai-result'),
+        btnGetAI: document.getElementById('btnGetAI'),
     };
 
     function buildUI() {
@@ -246,17 +287,94 @@
         elements.bar.style.width = `${(checkedBoxes.length / DATA.length) * 100}%`;
     }
 
+    async function getAiInterpretation() {
+        const checkedBoxes = document.querySelectorAll('#questions-tbody input:checked');
+        if (checkedBoxes.length === 0) {
+            alert("Yorum alabilmek için lütfen önce bazı soruları yanıtlayın.");
+            return;
+        }
+
+        elements.btnGetAI.disabled = true;
+        elements.aiResultContainer.style.display = 'block';
+        elements.aiResult.innerHTML = '<div class="loader"></div>';
+        elements.aiResultContainer.scrollIntoView({ behavior: 'smooth' });
+
+        const answersA = [];
+        const answersC = [];
+        DATA.forEach((q, i) => {
+            const box = document.getElementById(`q${i}`);
+            if (box.checked) {
+                if (q.col === 'A') answersA.push(q.text);
+                else if (q.col === 'C') answersC.push(q.text);
+            }
+        });
+
+        const prompt = `
+            Sen, bağlanma teorisi konusunda uzman, yardımsever bir psikoloji asistanısın.
+            Kullanıcı, Yakın İlişkilerde Yaşantılar Envanteri (ECR-R) anketini doldurdu.
+            'A' grubu ifadeler genellikle 'kaygılı bağlanma' (terk edilme korkusu, aşırı onay ihtiyacı) ile ilgilidir.
+            'C' grubu ifadeler genellikle 'kaçınmacı bağlanma' (yakınlıktan rahatsız olma, duygusal mesafe) ile ilgilidir.
+            'B' grubu ifadeler ise 'güvenli bağlanma' ile ilişkilidir.
+
+            Aşağıda kullanıcının işaretlediği 'A' ve 'C' grubu ifadeler listelenmiştir. Bu yanıtlara dayanarak, kişinin yakın ilişkilerdeki olası eğilimleri hakkında, yargılayıcı olmadan, nazik ve yapıcı bir dille 7-8 cümlelik kısa bir yorum yazar mısın? Yorumun bir teşhis veya tanı olmadığını, sadece kişisel farkındalık amaçlı olduğunu belirt. Cevabı direkt olarak yoruma başlayarak ver.
+
+            Kullanıcının Seçtiği Kaygı (A) İfadeleri:
+            - ${answersA.join('\n- ') || 'Yok'}
+
+            Kullanıcının Seçtiği Kaçınma (C) İfadeleri:
+            - ${answersC.join('\n- ') || 'Yok'}
+
+            Toplam Puanlar: A=${elements.countA.textContent}, B=${elements.countB.textContent}, C=${elements.countC.textContent}
+        `;
+        
+        try {
+            let chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
+            const payload = { contents: chatHistory };
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro-preview-05-20:generateContent?key=AIzaSyAYR9EZRf5DwzzJPpEUMZl5NnIa0TcNCgM`;
+            
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                throw new Error(`API request failed with status ${response.status}`);
+            }
+
+            const result = await response.json();
+            
+            if (result.candidates && result.candidates.length > 0) {
+                const text = result.candidates[0].content.parts[0].text;
+                elements.aiResult.innerText = text;
+            } else {
+                throw new Error("API'den geçerli bir yanıt alınamadı.");
+            }
+
+        } catch (error) {
+            console.error("Error fetching AI interpretation:", error);
+            elements.aiResult.innerText = "Yorum alınırken bir hata oluştu. Lütfen daha sonra tekrar deneyin.";
+        } finally {
+            elements.btnGetAI.disabled = false;
+        }
+    }
+
+
     // --- Button Event Listeners ---
     document.getElementById('btnReset').addEventListener('click', () => {
         if (!window.confirm('Tüm işaretlemeleri temizlemek istediğinize emin misiniz?')) return;
         localStorage.removeItem(ROOT_KEY);
         document.querySelectorAll('input[type=checkbox]').forEach(i => i.checked = false);
         updateCounters();
+        elements.aiResultContainer.style.display = 'none';
+        elements.aiResult.innerHTML = '';
         window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
     document.getElementById('btnPrint').addEventListener('click', () => window.print());
     document.getElementById('btnScrollTop').addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    document.getElementById('btnGetAI').addEventListener('click', getAiInterpretation);
 
     document.getElementById('btnCopy').addEventListener('click', () => {
         const lines = [
