@@ -151,9 +151,9 @@
         </section>
 
         <section id="ai-section" class="panel">
-            <button id="btnGetAI" class="primary w-full" style="width: 100%; padding-block: 14px; font-size: 16px;">Yorum Al (Yapay Zeka)</button>
+            <button id="btnGetAI" class="primary w-full" style="width: 100%; padding-block: 14px; font-size: 16px;">Karakter Analizi İste (Yapay Zeka)</button>
             <div id="ai-result-container" style="display: none;">
-                <h2>Kişisel Değerlendirme</h2>
+                <h2>Psikolojik Değerlendirme</h2>
                 <div id="ai-result"></div>
             </div>
         </section>
@@ -290,7 +290,7 @@
     async function getAiInterpretation() {
         const checkedBoxes = document.querySelectorAll('#questions-tbody input:checked');
         if (checkedBoxes.length === 0) {
-            alert("Yorum alabilmek için lütfen önce bazı soruları yanıtlayın.");
+            alert("Analiz için lütfen önce bazı ifadeleri işaretleyin.");
             return;
         }
 
@@ -299,39 +299,29 @@
         elements.aiResult.innerHTML = '<div class="loader"></div>';
         elements.aiResultContainer.scrollIntoView({ behavior: 'smooth' });
 
-        const answersA = [];
-        const answersC = [];
+        const selectedSentences = [];
         DATA.forEach((q, i) => {
             const box = document.getElementById(`q${i}`);
             if (box.checked) {
-                if (q.col === 'A') answersA.push(q.text);
-                else if (q.col === 'C') answersC.push(q.text);
+                selectedSentences.push(q.text);
             }
         });
 
         const prompt = `
-            Sen, bağlanma teorisi konusunda uzman, yardımsever bir psikoloji asistanısın.
-            Kullanıcı, Yakın İlişkilerde Yaşantılar Envanteri (ECR-R) anketini doldurdu.
-            'A' grubu ifadeler genellikle 'kaygılı bağlanma' (terk edilme korkusu, aşırı onay ihtiyacı) ile ilgilidir.
-            'C' grubu ifadeler genellikle 'kaçınmacı bağlanma' (yakınlıktan rahatsız olma, duygusal mesafe) ile ilgilidir.
-            'B' grubu ifadeler ise 'güvenli bağlanma' ile ilişkilidir.
+            Sen, danışanının doldurduğu bir anketin sonuçlarını yorumlayan deneyimli bir psikologsun.
+            Görevin, danışanının işaretlediği aşağıdaki ifadelere dayanarak onun ilişkilerdeki dinamikleri, temel korkuları, beklentileri ve bağlanma stili hakkında derinlemesine bir karakter analizi yapmaktır. Yorumun empatik, içgörülü ve yapıcı olmalı. Bir teşhis koymaktan kaçın, bunun yerine danışanın kendini daha iyi anlamasına yardımcı olacak çıkarımlarda bulun. Cevabı direkt olarak analize başlayarak ver.
 
-            Aşağıda kullanıcının işaretlediği 'A' ve 'C' grubu ifadeler listelenmiştir. Bu yanıtlara dayanarak, kişinin yakın ilişkilerdeki olası eğilimleri hakkında, yargılayıcı olmadan, nazik ve yapıcı bir dille 7-8 cümlelik kısa bir yorum yazar mısın? Yorumun bir teşhis veya tanı olmadığını, sadece kişisel farkındalık amaçlı olduğunu belirt. Cevabı direkt olarak yoruma başlayarak ver.
+            Danışanın katıldığını belirttiği ifadeler şunlar:
+            - ${selectedSentences.join('\n- ') || 'Hiçbir ifade seçilmedi.'}
 
-            Kullanıcının Seçtiği Kaygı (A) İfadeleri:
-            - ${answersA.join('\n- ') || 'Yok'}
-
-            Kullanıcının Seçtiği Kaçınma (C) İfadeleri:
-            - ${answersC.join('\n- ') || 'Yok'}
-
-            Toplam Puanlar: A=${elements.countA.textContent}, B=${elements.countB.textContent}, C=${elements.countC.textContent}
+            Lütfen bu ifadelere dayanarak karakter analizini yap.
         `;
         
         try {
             let chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
             const payload = { contents: chatHistory };
             const apiKey = "";
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=AIzaSyDvhdZjcOiut2LPOM7gzLZzxC_M47H1AbY`;
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro-preview-05-20:generateContent?key=AIzaSyDvhdZjcOiut2LPOM7gzLZzxC_M47H1AbY`;
             
             const response = await fetch(apiUrl, {
                 method: 'POST',
@@ -340,12 +330,12 @@
             });
 
             if (!response.ok) {
-                throw new Error(`API request failed with status ${response.status}`);
+                throw new Error(`API isteği başarısız oldu: ${response.status}`);
             }
 
             const result = await response.json();
             
-            if (result.candidates && result.candidates.length > 0) {
+            if (result.candidates && result.candidates.length > 0 && result.candidates[0].content.parts.length > 0) {
                 const text = result.candidates[0].content.parts[0].text;
                 elements.aiResult.innerText = text;
             } else {
@@ -353,8 +343,8 @@
             }
 
         } catch (error) {
-            console.error("Error fetching AI interpretation:", error);
-            elements.aiResult.innerText = "Yorum alınırken bir hata oluştu. Lütfen daha sonra tekrar deneyin.";
+            console.error("Yapay zeka yorumu alınırken hata:", error);
+            elements.aiResult.innerText = "Analiz alınırken bir hata oluştu. Lütfen daha sonra tekrar deneyin.";
         } finally {
             elements.btnGetAI.disabled = false;
         }
