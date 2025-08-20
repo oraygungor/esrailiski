@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>ECR‑R (Türkçe) v2 – İnteraktif Form</title>
+    <title>ECR‑R (Türkçe) – İnteraktif Form</title>
     <style>
         :root {
             --bg: #0b1020; --card: #121831; --muted: #99a2c2; --ink: #e8ecff;
@@ -44,7 +44,7 @@
         .question-table th, .question-table td { padding: 14px; text-align: left; border-top: 1px solid #1d2543; }
         .question-table thead { color: var(--muted); }
         .question-table th { font-weight: 700; }
-        .question-table th:not(:first-child), .question-table td:not(:first-child) { text-align: center; }
+        .question-table th:last-child, .question-table td:last-child { text-align: center; }
         .question-table tr:hover { background-color: rgba(255,255,255,0.03); }
 
         /* Checkbox Styles */
@@ -121,24 +121,21 @@
 
     <main class="wrap">
         <section class="card panel">
-            <p class="muted">Bu form, Fraley, Waller & Brennan (2000) ECR‑R ölçeğinin Türkçe uyarlamasındaki ifadelerin satır başına A/B/C seçenekleriyle işaretlenmesi için düzenlenmiştir. Aşağıdaki sayaçlar canlı olarak güncellenir ve yanıtlarınız tarayıcınızda <em>yerel olarak</em> saklanır.</p>
+            <p class="muted">Bu form, Fraley, Waller & Brennan (2000) ECR‑R ölçeğinin Türkçe uyarlamasıdır. Katıldığınız ifadeleri işaretleyerek kendinizle ilgili bir içgörü edinebilirsiniz. Aşağıdaki sayaçlar canlı olarak güncellenir ve yanıtlarınız tarayıcınızda <em>yerel olarak</em> saklanır.</p>
             <div class="kpis">
-                <div class="card badge a"><span class="dot"></span> A sayısı: <span id="countA">0</span></div>
-                <div class="card badge b"><span class="dot"></span> B sayısı: <span id="countB">0</span></div>
-                <div class="card badge c"><span class="dot"></span> C sayısı: <span id="countC">0</span></div>
+                <div class="card badge a"><span class="dot"></span> Kaygı Puanı (A): <span id="countA">0</span></div>
+                <div class="card badge c"><span class="dot"></span> Kaçınma Puanı (C): <span id="countC">0</span></div>
+                <div class="card badge b"><span class="dot"></span> Güvenli Puanı (B): <span id="countB">0</span></div>
                 <div class="card"><strong>Cevaplanan:</strong>&nbsp;<span id="answered">0</span>/<span id="total">0</span></div>
             </div>
             <div class="progress" aria-hidden="true" style="margin-top:10px"><span id="bar"></span></div>
-            <div class="tip small">Not: Orijinal materyalde yer alan “<em>A sütunundan işaretlediğiniz kutuların toplamı</em>” ibaresi için yukarıdaki <strong>A sayısı</strong> değerini kullanabilirsiniz.</div>
 
             <form id="form" class="card">
                 <table class="question-table">
                     <thead>
                         <tr>
-                            <th style="width: 70%;">İfade</th>
-                            <th style="width: 10%;">A</th>
-                            <th style="width: 10%;">B</th>
-                            <th style="width: 10%;">C</th>
+                            <th style="width: 90%;">İfade</th>
+                            <th style="width: 10%;">Katılıyorum</th>
                         </tr>
                     </thead>
                     <tbody id="questions-tbody"></tbody>
@@ -209,7 +206,7 @@
         { text: "Eski partnerlerimle (tamamen platonik olarak) bağlantıda kalmaktan rahatsızlık duymam. Nihayetinde birçok ortak yönümüz var.", col: "B" }
     ];
 
-    const ROOT_KEY = 'ecrr_form_v2_checkbox';
+    const ROOT_KEY = 'ecrr_form_v3_simplified';
     const elements = {
         tbody: document.getElementById('questions-tbody'),
         countA: document.getElementById('countA'),
@@ -230,17 +227,13 @@
             const textCell = row.insertCell();
             textCell.textContent = `${i + 1}. ${q.text}`;
 
-            ['A', 'B', 'C'].forEach(letter => {
-                const cell = row.insertCell();
-                if (q.col === letter) {
-                    const checkbox = document.createElement('input');
-                    checkbox.type = 'checkbox';
-                    checkbox.id = `q${i}`;
-                    checkbox.dataset.col = q.col;
-                    checkbox.addEventListener('change', saveAndUpdate);
-                    cell.appendChild(checkbox);
-                }
-            });
+            const checkboxCell = row.insertCell();
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.id = `q${i}`;
+            checkbox.dataset.col = q.col;
+            checkbox.addEventListener('change', saveAndUpdate);
+            checkboxCell.appendChild(checkbox);
         });
     }
 
@@ -309,19 +302,17 @@
 
         const prompt = `
             Sen, danışanının doldurduğu bir anketin sonuçlarını yorumlayan deneyimli bir psikologsun.
-            Görevin, danışanının işaretlediği aşağıdaki ifadelere dayanarak onun ilişkilerdeki dinamikleri, temel korkuları, beklentileri ve bağlanma stili hakkında derinlemesine bir karakter analizi yapmaktır. Yorumun empatik, içgörülü ve yapıcı olmalı. Bir teşhis koymaktan kaçın, bunun yerine danışanın kendini daha iyi anlamasına yardımcı olacak çıkarımlarda bulun. Cevabı direkt olarak analize başlayarak ver.
+            Görevin, danışanının katıldığını belirttiği aşağıdaki ifadelere dayanarak onun ilişkilerdeki dinamikleri, temel korkuları, beklentileri ve bağlanma stili hakkında derinlemesine bir karakter analizi yapmaktır. Yorumun empatik, içgörülü ve yapıcı olmalı. Bir teşhis koymaktan kaçın, bunun yerine danışanın kendini daha iyi anlamasına yardımcı olacak çıkarımlarda bulun. Lütfen analizini en fazla 8 cümle ve 2 paragraf olacak şekilde yapılandır. Cevabı direkt olarak analize başlayarak ver. Ayrıca cevap'ta psikolojik olarak ilişki yapıma psikolojide ne olarak tanımlanıyorsa onu da söyle tanım olarak.
 
             Danışanın katıldığını belirttiği ifadeler şunlar:
             - ${selectedSentences.join('\n- ') || 'Hiçbir ifade seçilmedi.'}
-
-            Lütfen bu ifadelere dayanarak karakter analizini yap. Fakat analizin 6 cümleyi geçmesin.
         `;
         
         try {
             let chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
             const payload = { contents: chatHistory };
             const apiKey = "";
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=AIzaSyDvhdZjcOiut2LPOM7gzLZzxC_M47H1AbY`;
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-0514:generateContent?key=AIzaSyDvhdZjcOiut2LPOM7gzLZzxC_M47H1AbY`;
             
             const response = await fetch(apiUrl, {
                 method: 'POST',
@@ -369,15 +360,15 @@
     document.getElementById('btnCopy').addEventListener('click', () => {
         const lines = [
             `ECR-R Anket Özeti`,
-            `Toplam A: ${elements.countA.textContent}`,
-            `Toplam B: ${elements.countB.textContent}`,
-            `Toplam C: ${elements.countC.textContent}`,
+            `Kaygı Puanı (A): ${elements.countA.textContent}`,
+            `Güvenli Puanı (B): ${elements.countB.textContent}`,
+            `Kaçınma Puanı (C): ${elements.countC.textContent}`,
             `Cevaplanan: ${elements.answered.textContent}/${DATA.length}`,
             '---',
         ];
         DATA.forEach((q, i) => {
             const box = document.getElementById(`q${i}`);
-            const val = box.checked ? `[${q.col}]` : `[ ]`;
+            const val = box.checked ? `[Katılıyor]` : `[ ]`;
             lines.push(`${i + 1}. ${val} ${q.text}`);
         });
         const text = lines.join('\n');
