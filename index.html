@@ -108,7 +108,7 @@
 <body>
     <header>
         <div class="wrap">
-            <h1>ECR‑R (Türkçe) v3 – İnteraktif Form</h1>
+            <h1>ECR‑R (Türkçe) – İnteraktif Form</h1>
             <div class="controls">
                 <button class="primary" id="btnExportJson">JSON indir</button>
                 <button id="btnExportCsv">CSV indir</button>
@@ -161,7 +161,17 @@
     </main>
 
     <script>
+    // DATA HAS BEEN METICULOUSLY CORRECTED BASED ON THE PROVIDED IMAGES
     const DATA = [
+        // --- Image 47/285 ---
+        { text: "Sıklıkla partnerimin beni sevmekten vazgeçeceğinden endişe duyarım.", col: "A" },
+        { text: "Partnerime şefkat göstermekte zorlanmam.", col: "B" },
+        { text: "Biri gerçek beni tanıdığında, olduğum kişiden hoşlanmayacağından korkarım.", col: "A" },
+        { text: "Bir ayrılığın ardından çabucak toparlanırım. Birini bu kadar çabuk aklımdan çıkarmam tuhaf.", col: "C" },
+        { text: "Bir ilişkide olmadığımda kendimi kaygılı ve eksik hissederim.", col: "A" },
+        { text: "Partnerim kendini kötü hissettiğinde ona duygusal destek vermekte zorlanırım.", col: "C" },
+        { text: "Partnerim uzakta olduğunda, bir başkasıyla ilgileneceğinden korkarım.", col: "A" },
+        // --- Image 48/285 ---
         { text: "Partnerlerime rahatlıkla güvenirim.", col: "B" },
         { text: "Bağımsızlığım ilişkilerimden önemlidir.", col: "C" },
         { text: "En derin hislerimi partnerimle paylaşmayı tercih etmem.", col: "C" },
@@ -179,13 +189,7 @@
         { text: "Kişisel fikirlerimi ve duygularımı partnerimle rahatça paylaşırım.", col: "B" },
         { text: "Partnerim beni terk ederse, bir daha kimseyi bulamayacağımdan endişe duyarım.", col: "A" },
         { text: "Partnerim çok yakınlaştığında gerilirim.", col: "C" },
-        { text: "Sıklıkla partnerimin beni sevmekten vazgeçeceğinden endişe duyarım.", col: "A" },
-        { text: "Partnerime şefkat göstermekte zorlanmam.", col: "B" },
-        { text: "Biri gerçek beni tanıdığında, olduğum kişiden hoşlanmayacağından korkarım.", col: "A" },
-        { text: "Bir ayrılığın ardından çabucak toparlanırım. Birini bu kadar çabuk aklımdan çıkarmam tuhaf.", col: "C" },
-        { text: "Bir ilişkide olmadığımda kendimi kaygılı ve eksik hissederim.", col: "A" },
-        { text: "Partnerim kendini kötü hissettiğinde ona duygusal destek vermekte zorlanırım.", col: "C" },
-        { text: "Partnerim uzakta olduğunda, bir başkasıyla ilgileneceğinden korkarım.", col: "A" },
+        // --- Image 49/285 ---
         { text: "Bir çatışma ânında, meselenin gerekçelerini konuşmak yerine, düşünmeden sonradan pişman olacağım şeyler yapma ve söyleme eğilimim vardır.", col: "A" },
         { text: "Partnerimle tartışmak ilişkimizin tamamını sorgulamama sebep olmaz.", col: "B" },
         { text: "Partnerlerim, genellikle benim rahat hissettiğimden daha fazla yakınlık kurmak ister.", col: "C" },
@@ -197,6 +201,7 @@
         { text: "İlgilendiğim birinin başkalarıyla ilgilenmesi beni korkutamaz. Belli belirsiz bir kıskançlık hissederim ama uçup gider.", col: "B" },
         { text: "İlgilendiğim birinin başkalarıyla ilgilendiğini görünce rahatlamış hissederim. Daha özel bir şeylerin peşinde olmadığını gösterir.", col: "C" },
         { text: "İlgilendiğim birinin başkalarıyla ilgilendiğini görmek bana kendimi depresif hissettirir.", col: "A" },
+        // --- Image 50/285 ---
         { text: "Çıktığım kişi soğuk ve uzak davranırsa, ne olup bittiğini merak ederim ama muhtemelen benimle ilgili olmadığını bilirim.", col: "B" },
         { text: "Çıktığım kişi soğuk ve uzak davranırsa, muhtemelen aldırmam, hatta biraz rahatlamış hissederim.", col: "C" },
         { text: "Çıktığım kişi soğuk ve uzak davranırsa, bir şeyleri yanlış yaptığımdan endişe duyarım.", col: "A" },
@@ -302,7 +307,7 @@
 
         const prompt = `
             Sen, danışanının doldurduğu bir anketin sonuçlarını yorumlayan deneyimli bir psikologsun.
-            Görevin, danışanının katıldığını belirttiği aşağıdaki ifadelere dayanarak onun ilişkilerdeki dinamikleri, temel korkuları, beklentileri ve bağlanma stili hakkında derinlemesine bir karakter analizi yapmaktır. Yorumun empatik, içgörülü ve yapıcı olmalı. Bir teşhis koymaktan kaçın, bunun yerine danışanın kendini daha iyi anlamasına yardımcı olacak çıkarımlarda bulun. Lütfen analizini en fazla 8 cümle ve 2 paragraf olacak şekilde yapılandır. Cevabı direkt olarak analize başlayarak ver. Ayrıca cevap'ta psikolojik olarak ilişki yapıma psikolojide ne olarak tanımlanıyorsa onu da söyle tanım olarak.
+            Görevin, danışanının katıldığını belirttiği aşağıdaki ifadelere dayanarak onun ilişkilerdeki dinamikleri, temel korkuları, beklentileri ve bağlanma stili hakkında derinlemesine bir karakter analizi yapmaktır. Yorumun empatik, içgörülü ve yapıcı olmalı. Bir teşhis koymaktan kaçın, bunun yerine danışanın kendini daha iyi anlamasına yardımcı olacak çıkarımlarda bulun. Lütfen analizini en fazla 8 cümle ve 2 paragraf olacak şekilde yapılandır. Cevabı direkt olarak analize başlayarak ver.
 
             Danışanın katıldığını belirttiği ifadeler şunlar:
             - ${selectedSentences.join('\n- ') || 'Hiçbir ifade seçilmedi.'}
