@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ECR‑R (Türkçe) – İnteraktif Form (A/B/C)</title>
+  <style>
+    :root{
+      --bg:#0b1020; --card:#121831; --muted:#99a2c2; --ink:#e8ecff;
+      --accent:#6aa0ff; --accent2:#7fffd4; --danger:#ff6a8a;
+    }
+    html,body{height:100%}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;background:linear-gradient(180deg,#0b1020,#0a0e1a 60%);color:var(--ink)}
+    .wrap{max-width:980px;margin-inline:auto;padding:24px}
+    header{position:sticky;top:0;z-index:5;background:rgba(11,16,32,.8);backdrop-filter:saturate(140%) blur(8px);border-bottom:1px solid #283050}
+    header .wrap{display:flex;gap:16px;align-items:center;justify-content:space-between;padding-block:10px}
+    h1{font-size:clamp(18px,3.2vw,28px);margin:0;letter-spacing:.2px}
+    .muted{color:var(--muted)}
+    .card{background:var(--card);border:1px solid #1e2744;border-radius:16px;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+    .panel{padding:18px}
+    .controls{display:flex;flex-wrap:wrap;gap:8px}
+    button{background:#1a2242;border:1px solid #2a3560;color:var(--ink);padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:600}
+    button:hover{border-color:var(--accent);box-shadow:0 0 0 3px rgba(106,160,255,.12)}
+    button.primary{background:linear-gradient(180deg,#2a5cff,#1a3ed6);border-color:#2a5cff}
+    button.ghost{background:transparent}
+    button.danger{background:#3a1430;border-color:#7a1e55}
+    .grid{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center}
+    .q{display:grid;grid-template-columns:1fr auto;gap:12px;padding:14px 16px;border-top:1px solid #1d2543}
+    .q:first-child{border-top:0;border-radius:14px 14px 0 0}
+    .q:last-child{border-radius:0 0 14px 14px}
+    .opts{display:flex;gap:10px}
+    .badge{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;font-weight:700;border:1px solid #2b3764;border-radius:999px}
+    .badge .dot{width:8px;height:8px;border-radius:50%}
+    .badge.a .dot{background:var(--accent2)}
+    .badge.b .dot{background:var(--accent)}
+    .badge.c .dot{background:#ffcf6a}
+    .kpis{display:flex;flex-wrap:wrap;gap:10px}
+    .kpis .card{display:flex;gap:10px;align-items:center;padding:10px 14px}
+    .progress{height:10px;background:#1b2344;border:1px solid #2a3560;border-radius:999px;overflow:hidden}
+    .progress>span{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#55e0ff);width:0}
+    fieldset{border:0;margin:0;padding:0}
+    legend{font-weight:700;margin-bottom:6px}
+    label.opt{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border:1px dashed #2b3764;border-radius:12px;font-weight:700}
+    label.opt input{transform:scale(1.2)}
+    .foot{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:12px}
+    .small{font-size:12px}
+    .tip{border-left:3px solid var(--accent);padding:12px;margin:14px 0;background:#0f1630}
+    @media (max-width:700px){
+      .q{grid-template-columns:1fr}
+      .grid{grid-template-columns:1fr}
+      header .wrap{flex-direction:column;align-items:flex-start}
+    }
+    @media print{
+      header,.controls,.tip,.foot{display:none!important}
+      body{background:#fff;color:#000}
+      .card{background:#fff;border-color:#bbb}
+      .q{page-break-inside:avoid}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>ECR‑R (Türkçe uyarlama) – A/B/C işaretlemeli interaktif form</h1>
+      <div class="controls">
+        <button class="primary" id="btnExportJson">JSON indir</button>
+        <button id="btnExportCsv">CSV indir</button>
+        <button id="btnCopy">Özeti kopyala</button>
+        <button class="ghost" id="btnPrint">Yazdır / PDF</button>
+        <button class="danger" id="btnReset">Temizle</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="card panel">
+      <p class="muted">Bu form, Fraley, Waller & Brennan (2000) ECR‑R ölçeğinin Türkçe uyarlamasındaki ifadelerin satır başına <strong>A / B / C</strong> seçenekleriyle işaretlenmesi için düzenlenmiştir. Aşağıdaki sayaçlar canlı olarak güncellenir ve yanıtlarınız tarayıcınızda <em>yerel olarak</em> saklanır.</p>
+      <div class="kpis">
+        <div class="card badge a"><span class="dot"></span> A sayısı: <span id="countA">0</span></div>
+        <div class="card badge b"><span class="dot"></span> B sayısı: <span id="countB">0</span></div>
+        <div class="card badge c"><span class="dot"></span> C sayısı: <span id="countC">0</span></div>
+        <div class="card"><strong>Cevaplanan:</strong>&nbsp;<span id="answered">0</span>/<span id="total">0</span></div>
+      </div>
+      <div class="progress" aria-hidden="true" style="margin-top:10px"><span id="bar"></span></div>
+      <div class="tip small">Not: Orijinal materyalde yer alan “<em>A sütunundan işaretlediğiniz kutuların toplamı</em>” ibaresi için yukarıdaki <strong>A sayısı</strong> değerini kullanabilirsiniz.</div>
+
+      <form id="form" class="card" style="margin-top:14px">
+        <fieldset id="questions"></fieldset>
+        <div class="foot">
+          <div class="small muted">Yanıtlar tarayıcınızda otomatik kaydedilir (yerel depolama). Cihaz değiştirirseniz veriler taşınmaz.</div>
+          <button id="btnScrollTop" type="button">Başa dön</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="panel muted small">
+      <p><strong>Uyarı:</strong> Bu araç bilgilendirme ve kişisel farkındalık amaçlıdır; bir değerlendirme/teşhis aracı değildir.</p>
+    </section>
+  </main>
+
+  <script>
+  const DATA = [
+    // --- Görsel 48/285 ---
+    "Partnerlerime rahatlıkla güvenirim.",
+    "Bağımsızlığım ilişkilerimden önemlidir.",
+    "En derin hislerimi partnerimle paylaşmayı tercih etmem.",
+    "Partnerime nasıl hissettiğimi gösterirsem benim için aynı şekilde hissetmeyeceğinden korkarım.",
+    "Romantik ilişkilerimden genellikle memnunum.",
+    "Romantik ilişkilerimde trip atma ihtiyacı hissetmem.",
+    "İlişkilerim hakkında çok düşünürüm.",
+    "Partnerlerime güvenmekte zorluk çekerim.",
+    "Bir partnere hızla bağlanma eğilimim vardır.",
+    "İhtiyaçlarımı ve isteklerimi partnerime ifade etmekte pek zorlanmam.",
+    "Partnerime zaman zaman nedenini bilmeden öfke duyar ve sinir olurum.",
+    "Partnerimin ruh hali beni çok etkiler.",
+    "İnsanların çoğunlukla dürüst ve güvenilir olduğuna inanırım.",
+    "Tek bir partnerle yakınlık kurmak yerine, kimseye bağlanmadığım tek gecelik ilişkileri tercih ederim.",
+    "Kişisel fikirlerimi ve duygularımı partnerimle rahatça paylaşırım.",
+    "Partnerim beni terk ederse, bir daha kimseyi bulamayacağımdan endişe duyarım.",
+    "Partnerim çok yakınlaştığında gerilirim.",
+
+    // --- Görsel 47/285 ---
+    "Sıklıkla partnerimin beni sevmekten vazgeçeceğinden endişe duyarım.",
+    "Partnerime şefkat göstermekte zorlanmam.",
+    "Biri gerçek beni tanıdığında, olduğum kişiden hoşlanmayacağından korkarım.",
+    "Bir ayrılığın ardından çabucak toparlanırım. Birini bu kadar çabuk aklımdan çıkarmam tuhaf.",
+    "Bir ilişkide olmadığımda kendimi kaygılı ve eksik hissederim.",
+    "Partnerim kendini kötü hissettiğinde ona duygusal destek vermekte zorlanırım.",
+    "Partnerim uzakta olduğunda, bir başkasıyla ilgileneceğinden korkarım.",
+
+    // --- Görsel 49/285 ---
+    "Bir çatışma ânında, meselenin gerekçelerini konuşmak yerine, düşünmeden sonradan pişman olacağım şeyler yapma ve söyleme eğilimim vardır.",
+    "Partnerimle tartışmak ilişkimizin tamamını sorgulamama sebep olmaz.",
+    "Partnerlerim, genellikle benim rahat hissettiğimden daha fazla yakınlık kurmak ister.",
+    "Yeterince çekici olmadığımdan endişe duyarım.",
+    "İlişkilerimde pek dram yaratmadığım için insanların beni sıkıcı bulduğu olur.",
+    "Partnerimi ayrıyken özler, bir aradayken kaçma isteği duyarım.",
+    "Biriyle fikir ayrılığı yaşadığımda düşüncelerimi rahatça ifade edebilirim.",
+    "Başka insanların bana bağımlı olduğu hissinden nefret ederim.",
+    "İlgilendiğim birinin başkalarıyla ilgilenmesi beni korkutamaz. Belli belirsiz bir kıskançlık hissederim ama uçup gider.",
+    "İlgilendiğim birinin başkalarıyla ilgilendiğini görünce rahatlamış hissederim. Daha özel bir şeylerin peşinde olmadığını gösterir.",
+    "İlgilendiğim birinin başkalarıyla ilgilendiğini görmek bana kendimi depresif hissettirir.",
+
+    // --- Görsel 50/285 ---
+    "Çıktığım kişi soğuk ve uzak davranırsa, ne olup bittiğini merak ederim ama muhtemelen benimle ilgili olmadığını bilirim.",
+    "Çıktığım kişi soğuk ve uzak davranırsa, muhtemelen aldırmam, hatta biraz rahatlamış hissederim.",
+    "Çıktığım kişi soğuk ve uzak davranırsa, bir şeyleri yanlış yaptığımdan endişe duyarım.",
+    "Partnerim benden ayrılacak olursa, ona ne kaçırdığını göstermek için elimden geleni yaparım (biraz kıskançlıktan zarar gelmez).",
+    "Birkaç aydır çıktığım biri benden ayrılmak isterse, başta incinirim ama daha sonra toparlarım.",
+    "Bazen ilişkide istediğimi elde ettikten sonra, artık neyi istediğimden emin olmam.",
+    "Eski partnerlerimle (tamamen platonik olarak) bağlantıda kalmaktan rahatsızlık duymam. Nihayetinde birçok ortak yönümüz var."
+  ];
+
+  const ROOT_KEY = 'ecrr_form_v1';
+
+  const elQuestions = document.getElementById('questions');
+  const elCountA = document.getElementById('countA');
+  const elCountB = document.getElementById('countB');
+  const elCountC = document.getElementById('countC');
+  const elAnswered = document.getElementById('answered');
+  const elTotal = document.getElementById('total');
+  const elBar = document.getElementById('bar');
+
+  // Build UI
+  elTotal.textContent = DATA.length;
+  DATA.forEach((text, i) => {
+    const idx = i+1;
+    const row = document.createElement('div');
+    row.className = 'q';
+
+    const label = document.createElement('label');
+    label.htmlFor = `q${idx}`;
+    label.textContent = `${idx}. ${text}`;
+
+    const opts = document.createElement('div');
+    opts.className = 'opts';
+
+    ['A','B','C'].forEach(letter => {
+      const lid = `q${idx}_${letter}`;
+      const wrap = document.createElement('label');
+      wrap.className = 'opt';
+      wrap.title = `Sütun ${letter}`;
+      const input = document.createElement('input');
+      input.type = 'radio';
+      input.name = `q${idx}`;
+      input.value = letter;
+      input.id = lid;
+      input.addEventListener('change', saveAndUpdate);
+      const span = document.createElement('span');
+      span.textContent = letter;
+      wrap.appendChild(input);
+      wrap.appendChild(span);
+      opts.appendChild(wrap);
+    });
+
+    row.appendChild(label);
+    row.appendChild(opts);
+    elQuestions.appendChild(row);
+  });
+
+  // Restore from storage
+  const saved = JSON.parse(localStorage.getItem(ROOT_KEY) || '{}');
+  for(const [k,v] of Object.entries(saved)){
+    const el = document.querySelector(`input[name="${k}"][value="${v}"]`);
+    if(el) el.checked = true;
+  }
+  updateCounters();
+
+  function getState(){
+    const state = {};
+    DATA.forEach((_,i)=>{
+      const idx = i+1;
+      const chosen = document.querySelector(`input[name="q${idx}"]:checked`);
+      if(chosen) state[`q${idx}`] = chosen.value;
+    });
+    return state;
+  }
+
+  function saveAndUpdate(){
+    const state = getState();
+    localStorage.setItem(ROOT_KEY, JSON.stringify(state));
+    updateCounters();
+  }
+
+  function updateCounters(){
+    let a=0,b=0,c=0,answered=0; 
+    DATA.forEach((_,i)=>{
+      const idx=i+1; const chosen = document.querySelector(`input[name="q${idx}"]:checked`);
+      if(chosen){
+        answered++;
+        if(chosen.value==='A') a++; else if(chosen.value==='B') b++; else if(chosen.value==='C') c++;
+      }
+    });
+    elCountA.textContent=a; elCountB.textContent=b; elCountC.textContent=c; elAnswered.textContent=answered;
+    elBar.style.width = `${(answered/DATA.length)*100}%`;
+  }
+
+  // Buttons
+  document.getElementById('btnReset').addEventListener('click', () => {
+    if(!confirm('Tüm işaretlemeleri temizlemek istediğinize emin misiniz?')) return;
+    localStorage.removeItem(ROOT_KEY);
+    document.querySelectorAll('input[type=radio]').forEach(i=>i.checked=false);
+    updateCounters();
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
+
+  document.getElementById('btnPrint').addEventListener('click', () => window.print());
+
+  document.getElementById('btnScrollTop').addEventListener('click', () => {
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
+
+  document.getElementById('btnCopy').addEventListener('click', async () => {
+    const s = getState();
+    const lines = [`Toplam A: ${elCountA.textContent}`,`Toplam B: ${elCountB.textContent}`,`Toplam C: ${elCountC.textContent}`,`Cevaplanan: ${elAnswered.textContent}/${DATA.length}`,''];
+    DATA.forEach((q,i)=>{
+      const key = `q${i+1}`; const val = s[key]||'-';
+      lines.push(`${i+1}. [${val}] ${q}`);
+    });
+    const text = lines.join('\n');
+    try{ await navigator.clipboard.writeText(text); alert('Özet panoya kopyalandı.'); }
+    catch{ alert('Kopyalama başarısız oldu.'); }
+  });
+
+  function exportFile(kind){
+    const s = getState();
+    const rows = [["no","secim","soru"]];
+    DATA.forEach((q,i)=> rows.push([String(i+1), s[`q${i+1}`]||'', q]));
+    if(kind==='json'){
+      const blob = new Blob([JSON.stringify({counts:{A:+elCountA.textContent,B:+elCountB.textContent,C:+elCountC.textContent}, answers:rows.slice(1).map(([no,secim,soru])=>({no:+no,secim,soru}))}, null,2)],{type:'application/json'});
+      triggerDownload(blob, 'ecrr_tr_form.json');
+    } else {
+      const csv = rows.map(r=> r.map(x=> '"'+String(x).replaceAll('"','""')+'"').join(',')).join('\n');
+      const blob = new Blob([csv],{type:'text/csv;charset=utf-8'});
+      triggerDownload(blob,'ecrr_tr_form.csv');
+    }
+  }
+  function triggerDownload(blob, filename){
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = filename; a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href), 5000);
+  }
+  document.getElementById('btnExportJson').addEventListener('click', ()=>exportFile('json'));
+  document.getElementById('btnExportCsv').addEventListener('click', ()=>exportFile('csv'));
+  </script>
+</body>
+</html>
